@@ -21,22 +21,22 @@ class TodoController extends Controller
 
     }
 
-    public function create(){
-        return view('create');// why only this part is todos.create
-    }
+    // public function create(){
+    //     return view('create');// why only this part is todos.create
+    // }
 
     public function store(Request $request){
-        // try{
-        //     $validatedData = $request->validate([
-        //         'name' => 'required',
-        //         'description' => 'required',
-        //     ]);
-
-        //     dd($validatedData);
-        // }
-        // catch (ValidationException $exception) {
-        //     $errorMessages = $exception->validator->getMessageBag()->getMessages();
-        // }
+        //I can specify required data
+        try{
+            $request->validate([
+                'name' => 'required',
+                'description' => 'required',
+            ]);
+        }
+        catch (ValidationException $exception) {
+            $errorMessages = $exception->validator->getMessageBag()->getMessages();
+            return $errorMessages;
+        }
 
         $data = $request->all();//取得所有input
         
@@ -60,28 +60,24 @@ class TodoController extends Controller
 
 
     public function details($id){
-        // $todo = Todo::find($id);
-        $todo = Todo::findOrFail($id);
+        // $todo = Todo::findOrFail($id); //throw 404 not found error
+        $todo = Todo::find($id);
         if ($todo){
             return response()->json(['status' => true, 'message' => "Get details success", 'data' => $todo], 200);
         }
         else{
-            $messageError = "Can't get the data";
+            $messageError = "Can't find the data";
             return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 400); 
         }
     }
     
-    public function edit(){
-    
-        return view('edit');
-    
-
-    }
+    // public function edit(){
+    //     return view('edit');
+    // }
 
     public function update(Request $request, $id)
     {
-        $todo = Todo::findOrFail($id);
-
+        $todo = Todo::findOrFail($id);//405 not found error, so it will not process upcoming requests
 
         $data = $request->all();
         
@@ -99,7 +95,7 @@ class TodoController extends Controller
 
     public function delete($id){
 
-        $todo = Todo::find($id);
+        $todo = Todo::findOrFail($id);
  
         if ($todo->delete()){
             return response()->json(['status' => true, 'message' => "Delete success!"], 204);
