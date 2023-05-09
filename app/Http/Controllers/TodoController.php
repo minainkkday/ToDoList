@@ -10,20 +10,14 @@ class TodoController extends Controller
 {
     public function index(){
         $todo = Todo::all();
-        // return response()->json($todo, 200);
         if ($todo){
             return response()->json(['status' => true, 'message' => "Get success", 'data' => $todo], 200);
         }
-        else{
-            $messageError = "Can't get the data";
-            return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 400); 
-        }
-
+        
+        $messageError = "Can't get the data";
+        return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 400); 
+    
     }
-
-    // public function create(){
-    //     return view('create');// why only this part is todos.create
-    // }
 
     public function store(Request $request){
         //I can specify required data
@@ -37,6 +31,8 @@ class TodoController extends Controller
             $errorMessages = $exception->validator->getMessageBag()->getMessages();
             return $errorMessages;
         }
+        //try catch -> 為了執行後面的流程
+        //error handle -》 改 json 的 format 來改緊啊
 
         $data = $request->all();//取得所有input
         
@@ -44,7 +40,8 @@ class TodoController extends Controller
         $todo = new Todo();//OOP - 呼叫 model
         $todo->name = $data['name'];
         $todo->description = $data['description'];
-        // $todo->save();
+        
+        //fail comes first， ans success comes last
         if ($todo->save()){
             return response()->json(['status' => true, 'message' => "Create success!"], 201);
         }
@@ -52,10 +49,6 @@ class TodoController extends Controller
             $messageError = "Fail to create.";
             return response()->json(['status' => false, 'message' => $messageError], 400); 
         }
-
-
-        // return redirect('/');
-
     }
 
 
@@ -78,6 +71,8 @@ class TodoController extends Controller
     public function update(Request $request, $id)
     {
         $todo = Todo::findOrFail($id);//405 not found error, so it will not process upcoming requests
+        //need to validate integer type, SQL injection - required
+        //url 上面的寫法， input 進來的 parameter， 可以做到多細 是我能決定的部分
 
         $data = $request->all();
         
