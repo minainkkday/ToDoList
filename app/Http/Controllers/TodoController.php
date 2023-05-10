@@ -15,7 +15,7 @@ class TodoController extends Controller
         }
         
         $messageError = "Can't get the data";
-        return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 400); 
+        return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 404); //Not found
     
     }
 
@@ -60,7 +60,7 @@ class TodoController extends Controller
         }
         else{
             $messageError = "Can't find the data";
-            return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 400); 
+            return response()->json(['status' => false, 'message' => $messageError, 'data' => null], 404);//not found 
         }
     }
     
