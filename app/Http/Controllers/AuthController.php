@@ -34,6 +34,8 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->first();
+
+        // dd($user);
         
         $token = $user->createToken("USER TOKEN")->plainTextToken;
 
@@ -87,6 +89,8 @@ class AuthController extends Controller
     public function getCurrentUser()
     {
         $user = Auth::user();
+
+        // dd($user);
 
         if(!$user){
             return $this->responseNotfound();

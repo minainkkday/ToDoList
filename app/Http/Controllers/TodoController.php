@@ -5,14 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Todo;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class TodoController extends Controller
 {
     public function index()
     {
-        $todo = Todo::all();
-        
-        return $this->responseSuccess($todo);
+        //User::find(Auth::id())->todos, this will get colletion type as a return.
+        $todos = User::find(Auth::id())->todos;
+        //If  I don't add values()->all(), it will return itself's indices, so I can't return the correct format
+        //use the values method to reset the keys to consecutively numbered indexes:
+        $sorted = $todos->sortByDesc('created_at')->values()->all();//To show recently created first
+        // dd($sorted);
+        return $this->responseSuccess($sorted);
     }
 
     public function store(Request $request)
@@ -33,9 +39,11 @@ class TodoController extends Controller
         $data = $request->all();//取得所有input
 
         $todo = new Todo();//OOP - 呼叫 model
+        $todo->user_id = Auth::id();
         $todo->name = $data['name'];
         $todo->description = $data['description'];
 
+        //try catch 
         $saved = $todo->save();
 
         if(!$saved){
@@ -47,7 +55,8 @@ class TodoController extends Controller
 
     public function details(int $id)
     {
-        $todo = Todo::find($id);
+        $todo = User::find(Auth::id())->todos->find($id);
+        // $todo = Todo::find($id);
 
         //Fail to find a data
         if(!$todo){
@@ -59,8 +68,7 @@ class TodoController extends Controller
 
     public function update(Request $request, int $id)
     {
-        $todo = Todo::find($id);
-
+        $todo = User::find(Auth::id())->todos->find($id);
         if(!$todo){
             return $this->responseNotfound();
         }
@@ -73,14 +81,25 @@ class TodoController extends Controller
         }
         catch (ValidationException $exception) {
             $errorMessages = $exception->validator->getMessageBag()->getMessages();
+            //exception handler ->  看情況
             return $this->responseFail($errorMessages);
         }
         
         $data = $request->all();
+        // try{
+        //     $todo->name = $data['name'];
+        //     $todo->description = $data['description'];
+    
+        //     //try catch, 噴錯誤是我想要的輸出的格式 顯示我想要的格式
+        //     $saved = $todo->save();
+        // }
+        // catch(Exception $error){
+
+        //     return $this->responseFail();
+        // }
         
         $todo->name = $data['name'];
         $todo->description = $data['description'];
-
         $saved = $todo->save();
 
         if(!$saved){
@@ -92,7 +111,7 @@ class TodoController extends Controller
 
     public function delete(int $id)
     {
-        $todo = Todo::find($id);
+        $todo = User::find(Auth::id())->todos->find($id);
         if(!$todo){
             return $this->responseNotfound();
         }
@@ -106,9 +125,14 @@ class TodoController extends Controller
         return $this->responseSuccess();
     }
 
+
     public function deleteAll()
     {
-        $deleted = Todo::truncate();
+        //collection cannot use truncate, I guess cuz it's not the table
+        //卡很久
+        $todos = User::find(Auth::id())->todos->pluck('id')->toArray();
+        $deleted = Todo::destroy($todos);
+        
         if (!$deleted){
             return $this->responseFail(); 
         }
