@@ -6,22 +6,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request)
+    public function login(Request $request)
     {
-        $credentials = $request->validated();
+        //It will throw an error by Exceptions/Handler   
+        $request->validate([
+            'email' => 'required | email',
+            'password' => 'required | min:6',
+        ]);
+
+        $credentials = $request->only('email', 'password');
 
         //https://laravel.com/docs/10.x/authentication#authenticating-users
+        //It doesn't throw AuthenticationException, so I used like this.
         $check = Auth::attempt($credentials);
         if (!$check) {
-            return $this->responseSuccess(false, 'AUTH_0001', 'Invalid email or password');
-        } 
+            return $this->responseFail('User not found');
+        }
 
-        $user = Auth::user();
+        $user = User::where('email', $request->email)->first();
         
         $token = $user->createToken("USER TOKEN")->plainTextToken;
 
@@ -30,16 +36,29 @@ class AuthController extends Controller
         return $this->responseSuccess($token);
     }
   
-    public function register(RegisterRequest $request)
+    public function register(Request $request)
     {  
-        $data = $request->validated();
-    
-        //No need try & catch, handeled by Exceptions/Handler
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password'])
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
         ]);
+           
+        $data = $request->all();
+
+        //It doesn't throw an error to me. So I am not really sure if I should use "if".
+        try{
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password'])
+            ]);
+        } catch(\Exception $e){
+            $this->responseFail($e->getMessage());
+        }
+        // if(!$user){
+        //     return $this->responseFail();
+        // }
 
         $token = $user->createToken("USER TOKEN")->plainTextToken;
 
