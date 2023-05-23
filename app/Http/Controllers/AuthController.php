@@ -12,30 +12,22 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        try{
-            $request->validate([
-                'email' => 'required | email',
-                'password' => 'required | min:6',
-            ]);
-        }
-        //這個不太會抓 email 的格式不正確性（我猜），好像只要有 @ 會認為 email
-        catch (ValidationException $exception) {
-            $errorMessages = $exception->validator->getMessageBag()->getMessages();
-            return $this->responseFail($errorMessages);
-        }
-        // dd($credentials);
+        //It will throw an error by Exceptions/Handler   
+        $request->validate([
+            'email' => 'required | email',
+            'password' => 'required | min:6',
+        ]);
 
         $credentials = $request->only('email', 'password');
 
         //https://laravel.com/docs/10.x/authentication#authenticating-users
+        //It doesn't throw AuthenticationException, so I used like this.
         $check = Auth::attempt($credentials);
         if (!$check) {
-            return $this->responseFail();
+            return $this->responseFail('User not found');
         }
 
         $user = User::where('email', $request->email)->first();
-
-        // dd($user);
         
         $token = $user->createToken("USER TOKEN")->plainTextToken;
 
@@ -46,29 +38,27 @@ class AuthController extends Controller
   
     public function register(Request $request)
     {  
-        try{
-            $request->validate([
-                'name' => 'required',
-                'email' => 'required|email|unique:users',
-                'password' => 'required|min:6',
-            ]);
-        }
-        catch (ValidationException $exception) {
-            $errorMessages = $exception->validator->getMessageBag()->getMessages();
-            return $this->responseFail($errorMessages);
-        }
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+        ]);
            
         $data = $request->all();
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password'])
-        ]);
-         
-        if(!$user){
-            return $this->responseFail();
+        //It doesn't throw an error to me. So I am not really sure if I should use "if".
+        try{
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password'])
+            ]);
+        } catch(\Exception $e){
+            $this->responseFail($e->getMessage());
         }
+        // if(!$user){
+        //     return $this->responseFail();
+        // }
 
         $token = $user->createToken("USER TOKEN")->plainTextToken;
 
@@ -89,9 +79,7 @@ class AuthController extends Controller
     public function getCurrentUser()
     {
         $user = Auth::user();
-
-        // dd($user);
-
+        
         if(!$user){
             return $this->responseNotfound();
         }

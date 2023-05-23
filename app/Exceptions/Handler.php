@@ -4,6 +4,10 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Validation\ValidationException;
+use LogicException;
+use Illuminate\Auth\AuthenticationException;
+
 
 class Handler extends ExceptionHandler
 {
@@ -46,5 +50,30 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+    public function render($request, Throwable $e)
+    {
+        parent::render($request, $e);
+
+        //This one works only!
+        if ($e instanceof ValidationException) {
+            $metadata = ['status' => '9999', 'desc'=>'Fail'];
+            $responseData = ['metadata' => $metadata, 'data' => $e->validator->getMessageBag()->getMessages()];
+            return response()->json($responseData, 400);
+        } 
+
+        //delete error handling, doens't work either
+        if ($e instanceof LogicException) {
+            $metadata = ['status' => '9999', 'desc'=>'Fail'];
+            $responseData = ['metadata' => $metadata, 'data' => $e->getMessage()];
+            return response()->json($responseData, 400);
+        } 
+
+        //Auth::attempt(), but somehow it doesn't work.
+        if ($e instanceof AuthenticationException) {
+            $metadata = ['status' => '9999', 'desc'=>'Fail'];
+            $responseData = ['metadata' => $metadata, 'data' => $e->getMessage()];
+            return response()->json($responseData, 400);
+        } 
     }
 }
