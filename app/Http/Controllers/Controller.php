@@ -11,10 +11,12 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     
-    public function responseSuccess(mixed $data = null)
+    //Add two parameters, user login fail case!
+    public function responseSuccess(mixed $data = null, string $status = '0000', string $desc = 'Success')
     {
-        $metadata = ['status' => '0000', 'desc'=>'Success'];
+        $metadata = ['status' => $status , 'desc'=> $desc];
         $responseData = ['metadata' => $metadata, 'data' => $data];
+        
         return response()->json($responseData, 200);
     }
 

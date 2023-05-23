@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\AuthController;
 
-Route::prefix('todos')->group(function (){
+Route::group(['prefix' => 'todos',  'middleware' => 'checkLogin'], function (){
     //GET
     Route::get('/', [TodoController::class, 'index']);
     Route::get('/{id}', [TodoController::class, 'details'])->whereNumber('id');//Routing - constraints, 404 error code by default 
