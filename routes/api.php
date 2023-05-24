@@ -1,14 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TodoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TodoController;
-use App\Http\Controllers\AuthController;
 
-Route::group(['prefix' => 'todos',  'middleware' => 'checkLogin'], function (){
+Route::group(['prefix' => 'todos',  'middleware' => 'checkLogin'], function () {
     //GET
     Route::get('/', [TodoController::class, 'index']);
-    Route::get('/{id}', [TodoController::class, 'details'])->whereNumber('id');//Routing - constraints, 404 error code by default 
+    Route::get('/{id}', [TodoController::class, 'details'])->whereNumber('id'); //Routing - constraints, 404 error code by default
 
     //POST
     Route::post('/', [TodoController::class, 'store']);
@@ -21,15 +21,15 @@ Route::group(['prefix' => 'todos',  'middleware' => 'checkLogin'], function (){
     Route::delete('/{id}', [TodoController::class, 'delete'])->whereNumber('id');
 });
 
-Route::prefix('/users')->group(function (){
+Route::prefix('/users')->group(function () {
     //GET
     Route::get('/register', [AuthController::class, 'seeRegistered']);
-    Route::get('/login', [AuthController::class, 'getCurrentUser']); 
+    Route::get('/login', [AuthController::class, 'getCurrentUser']);
 
     //POST
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']); 
-    Route::post('/logout', [AuthController::class, 'logout']); 
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

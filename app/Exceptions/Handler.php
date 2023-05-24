@@ -2,12 +2,10 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Throwable;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Auth\AuthenticationException;
-
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
@@ -51,24 +49,28 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
     public function render($request, Throwable $e)
     {
         if ($e instanceof ValidationException) {
-            $metadata = ['status' => '9999', 'desc'=>'Fail'];
+            $metadata = ['status' => '9999', 'desc' => 'Fail'];
             $responseData = ['metadata' => $metadata, 'data' => $e->validator->getMessageBag()->getMessages()];
+
             return response()->json($responseData, 400);
-        } 
+        }
 
         //Delete error handling
         if ($e instanceof ModelNotFoundException) {
-            $metadata = ['status' => '9999', 'desc'=>'Fail'];
+            $metadata = ['status' => '9999', 'desc' => 'Fail'];
             $responseData = ['metadata' => $metadata, 'data' => $e->getMessage()];
+
             return response()->json($responseData, 404);
-        } 
+        }
 
         //With my own format, it throws an exception.
-        $metadata = ['status' => '9999', 'desc'=>'Fail'];
+        $metadata = ['status' => '9999', 'desc' => 'Fail'];
         $responseData = ['metadata' => $metadata, 'data' => $e->getMessage()];
+
         return response()->json($responseData, 422);
     }
 }

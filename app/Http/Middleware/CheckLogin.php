@@ -11,7 +11,6 @@ class CheckLogin
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
@@ -22,9 +21,10 @@ class CheckLogin
             return $next($request);
         }
 
-        //401 未認證    
-        $metadata = ['status' => 'AUTH_0002' , 'desc'=> 'Unauthrozied Approach'];
-        $responseData = ['metadata' => $metadata, 'data' => false];
+        //401 未認證
+        $metadata = ['status' => 'AUTH_0002', 'desc' => 'Unauthrozied Approach'];
+        $responseData = ['metadata' => $metadata, 'data' => null];
+
         return response()->json($responseData, 401);
     }
 }

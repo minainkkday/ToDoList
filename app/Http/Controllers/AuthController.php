@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -19,29 +19,29 @@ class AuthController extends Controller
         $check = Auth::attempt($credentials);
         if (!$check) {
             return $this->responseSuccess(false, 'AUTH_0001', 'Invalid email or password');
-        } 
+        }
 
         $user = Auth::user();
-        
-        $token = $user->createToken("USER TOKEN")->plainTextToken;
+
+        $token = $user->createToken('USER TOKEN')->plainTextToken;
 
         $request->session()->regenerate();
 
         return $this->responseSuccess($token);
     }
-  
+
     public function register(RegisterRequest $request)
-    {  
+    {
         $data = $request->validated();
-    
+
         //No need try & catch, handeled by Exceptions/Handler
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password'])
+            'password' => Hash::make($data['password']),
         ]);
 
-        $token = $user->createToken("USER TOKEN")->plainTextToken;
+        $token = $user->createToken('USER TOKEN')->plainTextToken;
 
         return $this->responseSuccess($token);
     }
@@ -50,18 +50,18 @@ class AuthController extends Controller
     {
         $users = User::all();
 
-        if(!$users){
+        if (!$users) {
             return $this->responseNotfound();
         }
 
         return $this->responseSuccess($users);
     }
-    
+
     public function getCurrentUser()
     {
         $user = Auth::user();
-        
-        if(!$user){
+
+        if (!$user) {
             return $this->responseNotfound();
         }
 
@@ -71,9 +71,9 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-    
+
         $request->session()->invalidate();
-    
+
         $request->session()->regenerateToken();
 
         return $this->responseSuccess();

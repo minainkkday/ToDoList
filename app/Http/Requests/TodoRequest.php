@@ -25,7 +25,7 @@ class TodoRequest extends FormRequest
     {
         return [
             'name' => 'required | max:255',
-            'description' => 'required | max:1000'
+            'description' => 'required | max:1000',
         ];
     }
 }
