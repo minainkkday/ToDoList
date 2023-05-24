@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\TodoController;
+use App\Http\Controllers\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Users;
-use App\Http\Controllers\TodoController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -26,7 +27,6 @@ use App\Http\Controllers\TodoController;
 // Route::get('/hello', function (){
 //     return response('<h1>HELLO World</h1>');
 // });
-
 
 // Route::view('/', "index");//url, page name(from views), short version of calling view
 
